@@ -15,26 +15,33 @@ export const ProfileLink = () => {
   const session = useSession();
   const router = useRouter();
   const [searchUsername, setSearchUsername] = useState('');
-  const [featuredProfile, setFeaturedProfile] = useState<FeaturedProfile | null>(null);
+  const [featuredProfiles, setFeaturedProfiles] = useState<FeaturedProfile[]>([]);
 
   useEffect(() => {
-    // Fetch @telamon's profile from World API
-    const fetchFeaturedProfile = async () => {
-      try {
-        const userInfo = await MiniKit.getUserByUsername('telamon');
-        if (userInfo && userInfo.username) {
-          setFeaturedProfile({
-            username: userInfo.username,
-            walletAddress: userInfo.walletAddress,
-            profilePictureUrl: userInfo.profilePictureUrl,
-          });
+    // Fetch featured profiles from World API
+    const fetchFeaturedProfiles = async () => {
+      const usernames = ['telamon', 'maksim'];
+      const profiles: FeaturedProfile[] = [];
+
+      for (const username of usernames) {
+        try {
+          const userInfo = await MiniKit.getUserByUsername(username);
+          if (userInfo && userInfo.username) {
+            profiles.push({
+              username: userInfo.username,
+              walletAddress: userInfo.walletAddress,
+              profilePictureUrl: userInfo.profilePictureUrl,
+            });
+          }
+        } catch (error) {
+          console.error(`Error fetching profile for ${username}:`, error);
         }
-      } catch (error) {
-        console.error('Error fetching featured profile:', error);
       }
+
+      setFeaturedProfiles(profiles);
     };
 
-    fetchFeaturedProfile();
+    fetchFeaturedProfiles();
   }, []);
 
   const handleViewProfile = () => {
@@ -52,10 +59,8 @@ export const ProfileLink = () => {
     }
   };
 
-  const handleVisitFeatured = () => {
-    if (featuredProfile) {
-      router.push(`/${featuredProfile.username}`);
-    }
+  const handleVisitFeatured = (username: string) => {
+    router.push(`/${username}`);
   };
 
   return (
@@ -71,24 +76,27 @@ export const ProfileLink = () => {
         View My Coffee Page
       </Button>
 
-      {/* Featured Profile */}
-      {featuredProfile && (
+      {/* Featured Profiles */}
+      {featuredProfiles.length > 0 && (
         <>
           <div className="w-full h-px bg-gray-200" />
 
           <p className="text-lg font-semibold">Featured</p>
 
-          <button
-            onClick={handleVisitFeatured}
-            className="w-full bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 hover:bg-gray-50 transition-colors"
-          >
-            <Marble src={featuredProfile.profilePictureUrl} className="w-12" />
-            <div className="flex-1 text-left">
-              <p className="font-semibold">@{featuredProfile.username}</p>
-              <p className="text-sm text-gray-500">Buy them a coffee</p>
-            </div>
-            <div className="text-2xl">☕</div>
-          </button>
+          {featuredProfiles.map((profile) => (
+            <button
+              key={profile.username}
+              onClick={() => handleVisitFeatured(profile.username)}
+              className="w-full bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 hover:bg-gray-50 transition-colors"
+            >
+              <Marble src={profile.profilePictureUrl} className="w-12" />
+              <div className="flex-1 text-left">
+                <p className="font-semibold">@{profile.username}</p>
+                <p className="text-sm text-gray-500">Buy them a coffee</p>
+              </div>
+              <div className="text-2xl">☕</div>
+            </button>
+          ))}
         </>
       )}
 

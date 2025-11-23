@@ -127,8 +127,8 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
         </Button>
       </div>
 
-      {/* Call to action box - only show for other users */}
-      {!isOwnProfile && messages.length === 0 && (
+      {/* Call to action box - show when no messages */}
+      {messages.length === 0 && (
         <div className="bg-gray-100 rounded-2xl p-8 text-center">
           <p className="text-lg font-medium">
             Be the first one to buy {profile.username} a coffee
