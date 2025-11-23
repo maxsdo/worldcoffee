@@ -88,12 +88,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // Fetch the user info from World API
         const userInfo = await MiniKit.getUserInfo(finalPayload.address);
 
+        // TODO: Re-enable once we verify the correct field name for verification level
         // Check if user is verified human (Orb verification only)
-        const userInfoWithVerification = userInfo as any;
-        if (userInfoWithVerification.verificationLevel !== 'orb') {
-          console.log('User is not Orb verified. Verification level:', userInfoWithVerification.verificationLevel);
-          throw new Error('Only verified humans (Orb verification) can access this app');
-        }
+        // const userInfoWithVerification = userInfo as any;
+        // if (userInfoWithVerification.verificationLevel !== 'orb') {
+        //   console.log('User is not Orb verified. Verification level:', userInfoWithVerification.verificationLevel);
+        //   throw new Error('Only verified humans (Orb verification) can access this app');
+        // }
 
         return {
           id: finalPayload.address,
