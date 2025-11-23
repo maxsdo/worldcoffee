@@ -1,5 +1,6 @@
 import { Page } from '@/components/PageLayout';
 import { ProfileLink } from '@/components/ProfileLink';
+import { RecentActivity } from '@/components/RecentActivity';
 import { TopBar } from '@worldcoin/mini-apps-ui-kit-react';
 import { HomeRedirect } from '@/components/HomeRedirect';
 
@@ -15,8 +16,9 @@ export default async function Home() {
           }
         />
       </Page.Header>
-      <Page.Main className="flex flex-col items-center justify-start gap-4 mb-16">
+      <Page.Main className="flex flex-col items-center justify-start gap-6 mb-16">
         <ProfileLink />
+        <RecentActivity />
       </Page.Main>
     </>
   );
