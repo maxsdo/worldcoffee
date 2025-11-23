@@ -1,20 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
-
-interface ProfileDescription {
-  username: string;
-  description: string;
-  updatedAt: string;
-}
-
-// In-memory storage for profile descriptions (in production, use a database)
-declare global {
-  var profileDescriptions: Map<string, ProfileDescription> | undefined;
-}
-
-if (!global.profileDescriptions) {
-  global.profileDescriptions = new Map();
-}
+import { sql } from '@vercel/postgres';
 
 // Get description for a specific user
 interface GetParams {
@@ -26,13 +12,18 @@ interface GetParams {
 export async function GET(request: Request, { params }: GetParams) {
   try {
     const { username } = await params;
-    const description = global.profileDescriptions?.get(username.toLowerCase());
 
-    if (!description) {
+    const result = await sql`
+      SELECT description
+      FROM profile_descriptions
+      WHERE LOWER(username) = LOWER(${username})
+    `;
+
+    if (result.rows.length === 0) {
       return NextResponse.json({ description: '' });
     }
 
-    return NextResponse.json({ description: description.description });
+    return NextResponse.json({ description: result.rows[0].description });
   } catch (error) {
     console.error('Error fetching description:', error);
     return NextResponse.json(
@@ -71,13 +62,15 @@ export async function POST(request: Request, { params }: GetParams) {
       );
     }
 
-    const profileDescription: ProfileDescription = {
-      username: username.toLowerCase(),
-      description: description || '',
-      updatedAt: new Date().toISOString(),
-    };
-
-    global.profileDescriptions?.set(username.toLowerCase(), profileDescription);
+    // Upsert profile description
+    await sql`
+      INSERT INTO profile_descriptions (username, description)
+      VALUES (LOWER(${username}), ${description || ''})
+      ON CONFLICT (username)
+      DO UPDATE SET
+        description = ${description || ''},
+        updated_at = CURRENT_TIMESTAMP
+    `;
 
     return NextResponse.json({ success: true, description: description || '' });
   } catch (error) {

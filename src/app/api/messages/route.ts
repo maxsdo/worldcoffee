@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/auth';
+import { sql } from '@vercel/postgres';
 
 interface Message {
   id: string;
@@ -11,15 +12,6 @@ interface Message {
   amount: string;
   transactionHash?: string;
   createdAt: string;
-}
-
-// In-memory storage for messages (in production, use a database)
-declare global {
-  var coffeeMessages: Message[] | undefined;
-}
-
-if (!global.coffeeMessages) {
-  global.coffeeMessages = [];
 }
 
 export async function POST(request: Request) {
@@ -40,25 +32,38 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create new message
-    const newMessage: Message = {
-      id: crypto.randomUUID(),
-      paymentId,
-      toUsername,
-      fromUsername: session.user.username,
-      fromProfilePictureUrl: session.user.profilePictureUrl,
-      message: message || '',
-      amount,
-      transactionHash,
-      createdAt: new Date().toISOString(),
-    };
+    // Insert message into database
+    const result = await sql`
+      INSERT INTO messages (
+        payment_id,
+        to_username,
+        from_username,
+        from_profile_picture_url,
+        message,
+        amount,
+        transaction_hash
+      ) VALUES (
+        ${paymentId},
+        ${toUsername},
+        ${session.user.username},
+        ${session.user.profilePictureUrl || null},
+        ${message || ''},
+        ${amount},
+        ${transactionHash || null}
+      )
+      RETURNING
+        id,
+        payment_id as "paymentId",
+        to_username as "toUsername",
+        from_username as "fromUsername",
+        from_profile_picture_url as "fromProfilePictureUrl",
+        message,
+        amount,
+        transaction_hash as "transactionHash",
+        created_at as "createdAt"
+    `;
 
-    if (!global.coffeeMessages) {
-      global.coffeeMessages = [];
-    }
-    global.coffeeMessages.push(newMessage);
-
-    return NextResponse.json(newMessage);
+    return NextResponse.json(result.rows[0]);
   } catch (error) {
     console.error('Error saving message:', error);
     return NextResponse.json(
@@ -69,5 +74,28 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json({ messages: global.coffeeMessages || [] });
+  try {
+    const result = await sql`
+      SELECT
+        id,
+        payment_id as "paymentId",
+        to_username as "toUsername",
+        from_username as "fromUsername",
+        from_profile_picture_url as "fromProfilePictureUrl",
+        message,
+        amount,
+        transaction_hash as "transactionHash",
+        created_at as "createdAt"
+      FROM messages
+      ORDER BY created_at DESC
+    `;
+
+    return NextResponse.json({ messages: result.rows });
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch messages' },
+      { status: 500 }
+    );
+  }
 }

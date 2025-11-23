@@ -1,26 +1,5 @@
 import { NextResponse } from 'next/server';
-
-interface Message {
-  id: string;
-  paymentId: string;
-  toUsername: string;
-  fromUsername: string;
-  fromProfilePictureUrl?: string;
-  message: string;
-  amount: string;
-  transactionHash?: string;
-  createdAt: string;
-}
-
-// Import from parent route (in production, use a shared database)
-// For now, we'll use a global variable
-declare global {
-  var coffeeMessages: Message[] | undefined;
-}
-
-if (!global.coffeeMessages) {
-  global.coffeeMessages = [];
-}
+import { sql } from '@vercel/postgres';
 
 interface Params {
   params: Promise<{
@@ -32,12 +11,24 @@ export async function GET(request: Request, { params }: Params) {
   try {
     const { username } = await params;
 
-    // Filter messages for this user
-    const userMessages = (global.coffeeMessages || [])
-      .filter(msg => msg.toUsername.toLowerCase() === username.toLowerCase())
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    // Query messages for this user from database
+    const result = await sql`
+      SELECT
+        id,
+        payment_id as "paymentId",
+        to_username as "toUsername",
+        from_username as "fromUsername",
+        from_profile_picture_url as "fromProfilePictureUrl",
+        message,
+        amount,
+        transaction_hash as "transactionHash",
+        created_at as "createdAt"
+      FROM messages
+      WHERE LOWER(to_username) = LOWER(${username})
+      ORDER BY created_at DESC
+    `;
 
-    return NextResponse.json({ messages: userMessages });
+    return NextResponse.json({ messages: result.rows });
   } catch (error) {
     console.error('Error fetching messages:', error);
     return NextResponse.json(
