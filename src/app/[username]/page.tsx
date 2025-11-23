@@ -1,8 +1,6 @@
 import { Page } from '@/components/PageLayout';
 import { ProfileView } from '@/components/ProfileView';
-import { BackButton } from '@/components/BackButton';
-import { OrbuccinoLogo } from '@/components/OrbuccinoLogo';
-import { TopBar } from '@worldcoin/mini-apps-ui-kit-react';
+import { OrbuccinoHeader } from '@/components/OrbuccinoHeader';
 import { notFound } from 'next/navigation';
 
 interface ProfilePageProps {
@@ -24,15 +22,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   return (
     <>
       <Page.Header className="p-0">
-        <TopBar
-          title="orbuccino"
-          startAdornment={
-            <>
-              <BackButton />
-              <OrbuccinoLogo className="w-6 h-6 ml-4" />
-            </>
-          }
-        />
+        <OrbuccinoHeader showBackButton />
       </Page.Header>
       <Page.Main className="flex flex-col items-center justify-start gap-4 mb-16">
         <ProfileView username={cleanUsername} />
