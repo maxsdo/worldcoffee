@@ -1,38 +1,22 @@
-import { auth } from '@/auth';
 import { Page } from '@/components/PageLayout';
-import { Pay } from '@/components/Pay';
 import { ProfileLink } from '@/components/ProfileLink';
-import { Transaction } from '@/components/Transaction';
-import { UserInfo } from '@/components/UserInfo';
-import { Verify } from '@/components/Verify';
-import { ViewPermissions } from '@/components/ViewPermissions';
-import { Marble, TopBar } from '@worldcoin/mini-apps-ui-kit-react';
+import { TopBar } from '@worldcoin/mini-apps-ui-kit-react';
+import { HomeRedirect } from '@/components/HomeRedirect';
 
 export default async function Home() {
-  const session = await auth();
-
   return (
     <>
+      <HomeRedirect />
       <Page.Header className="p-0">
         <TopBar
-          title="Home"
-          endAdornment={
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-semibold capitalize">
-                {session?.user.username}
-              </p>
-              <Marble src={session?.user.profilePictureUrl} className="w-12" />
-            </div>
+          title="worldcoffee"
+          startAdornment={
+            <div className="w-3 h-3 bg-blue-600 rounded-full" />
           }
         />
       </Page.Header>
       <Page.Main className="flex flex-col items-center justify-start gap-4 mb-16">
-        <UserInfo />
         <ProfileLink />
-        <Verify />
-        <Pay />
-        <Transaction />
-        <ViewPermissions />
       </Page.Main>
     </>
   );
