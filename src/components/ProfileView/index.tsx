@@ -36,7 +36,7 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
         // Fetch user profile from World API
         const userInfo = await MiniKit.getUserByUsername(username);
 
-        if (!userInfo) {
+        if (!userInfo || !userInfo.username) {
           setError('User not found');
           setLoading(false);
           return;

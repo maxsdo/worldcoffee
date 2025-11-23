@@ -53,6 +53,9 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
     };
 
+    if (!global.coffeeMessages) {
+      global.coffeeMessages = [];
+    }
     global.coffeeMessages.push(newMessage);
 
     return NextResponse.json(newMessage);
