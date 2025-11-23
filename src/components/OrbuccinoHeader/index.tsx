@@ -1,4 +1,5 @@
 'use client';
+import { useRouter } from 'next/navigation';
 import { OrbuccinoLogo } from '@/components/OrbuccinoLogo';
 
 interface OrbuccinoHeaderProps {
@@ -6,11 +7,13 @@ interface OrbuccinoHeaderProps {
 }
 
 export const OrbuccinoHeader = ({ showBackButton }: OrbuccinoHeaderProps) => {
+  const router = useRouter();
+
   return (
     <div className="flex items-center justify-center w-full h-14 border-b border-gray-200 bg-white relative">
       {showBackButton && (
         <button
-          onClick={() => window.history.back()}
+          onClick={() => router.back()}
           className="absolute left-4 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-full transition-colors"
           aria-label="Go back"
         >
