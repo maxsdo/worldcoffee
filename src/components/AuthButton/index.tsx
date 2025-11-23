@@ -1,6 +1,7 @@
 'use client';
 import { walletAuth } from '@/auth/wallet';
 import { Button, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
+import { MiniKit } from '@worldcoin/minikit-js';
 import { useMiniKit } from '@worldcoin/minikit-js/minikit-provider';
 import { useCallback, useState } from 'react';
 
@@ -18,6 +19,12 @@ export const AuthButton = () => {
     if (!isInstalled || isPending) {
       return;
     }
+
+    // Send haptic feedback
+    MiniKit.commands.sendHapticFeedback({
+      hapticsType: 'impact',
+      style: 'light',
+    });
 
     setIsPending(true);
     setAuthError(null);
