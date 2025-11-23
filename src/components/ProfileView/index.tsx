@@ -28,6 +28,10 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
   const session = useSession();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [description, setDescription] = useState('');
+  const [editingDescription, setEditingDescription] = useState(false);
+  const [tempDescription, setTempDescription] = useState('');
+  const [savingDescription, setSavingDescription] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,6 +62,14 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
           const data = await response.json();
           setMessages(data.messages || []);
         }
+
+        // Fetch profile description
+        const descResponse = await fetch(`/api/profile/${username}/description`);
+        if (descResponse.ok) {
+          const descData = await descResponse.json();
+          setDescription(descData.description || '');
+          setTempDescription(descData.description || '');
+        }
       } catch (err) {
         console.error('Error fetching profile:', err);
         setError('Failed to load profile');
@@ -71,6 +83,37 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
 
   const handleCoffeePurchased = (newMessage: Message) => {
     setMessages(prev => [newMessage, ...prev]);
+  };
+
+  const handleSaveDescription = async () => {
+    if (!profile) return;
+
+    try {
+      setSavingDescription(true);
+      const response = await fetch(`/api/profile/${profile.username}/description`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: tempDescription }),
+      });
+
+      if (response.ok) {
+        setDescription(tempDescription);
+        setEditingDescription(false);
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to save description');
+      }
+    } catch (err) {
+      console.error('Error saving description:', err);
+      alert('Failed to save description');
+    } finally {
+      setSavingDescription(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setTempDescription(description);
+    setEditingDescription(false);
   };
 
   const handleShare = async () => {
@@ -112,16 +155,73 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
   return (
     <div className="flex flex-col w-full gap-6 px-4">
       {/* Profile Header */}
-      <div className="flex flex-col items-center gap-4 pt-6">
+      <div className="flex flex-col items-center gap-4 pt-6 w-full">
         <Marble src={profile.profilePictureUrl} className="w-24" />
         <h1 className="text-2xl font-semibold">@{profile.username}</h1>
 
-        {/* Share Button */}
+        {/* Description Section */}
+        <div className="w-full">
+          {editingDescription ? (
+            <div className="flex flex-col gap-2 w-full">
+              <textarea
+                value={tempDescription}
+                onChange={(e) => setTempDescription(e.target.value.slice(0, 240))}
+                placeholder="Add a description to your profile..."
+                maxLength={240}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-blue-600 resize-none"
+                rows={3}
+              />
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-gray-500">
+                  {tempDescription.length}/240 characters
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleCancelEdit}
+                    size="sm"
+                    variant="secondary"
+                    disabled={savingDescription}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleSaveDescription}
+                    size="sm"
+                    variant="primary"
+                    disabled={savingDescription}
+                  >
+                    {savingDescription ? 'Saving...' : 'Save'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="w-full">
+              {description ? (
+                <p className="text-center text-gray-700 mb-2">{description}</p>
+              ) : isOwnProfile ? (
+                <p className="text-center text-gray-400 text-sm mb-2">No description yet</p>
+              ) : null}
+              {isOwnProfile && (
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => setEditingDescription(true)}
+                    className="text-sm text-blue-600 hover:text-blue-700"
+                  >
+                    {description ? 'Edit description' : 'Add description'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Share Button - Full Width */}
         <Button
           onClick={handleShare}
           size="lg"
           variant="secondary"
-          className="rounded-full px-8"
+          className="w-full rounded-full"
         >
           Share
         </Button>
