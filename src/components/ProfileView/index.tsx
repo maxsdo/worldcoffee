@@ -137,6 +137,8 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
         verification_level: 'orb' as any, // Only accept orb verification
       });
 
+      console.log('Verification payload:', finalPayload);
+
       if (finalPayload.status === 'success') {
         // Send verification to backend
         const response = await fetch('/api/verify', {
@@ -146,13 +148,28 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
         });
 
         if (response.ok) {
-          setIsVerified(true);
-          alert('✅ Successfully verified with World ID!');
+          const data = await response.json();
+          console.log('Verification saved:', data);
+
+          // Refetch verification status to ensure it's updated
+          const verifyResponse = await fetch(`/api/verify?username=${username}`);
+          if (verifyResponse.ok) {
+            const verifyData = await verifyResponse.json();
+            setIsVerified(verifyData.verified || false);
+            alert('✅ Successfully verified with World ID!');
+          } else {
+            console.error('Failed to fetch updated verification status');
+            // Still set it locally even if refetch fails
+            setIsVerified(true);
+            alert('✅ Successfully verified with World ID!');
+          }
         } else {
           const data = await response.json();
+          console.error('Verification API error:', data);
           alert(data.error || 'Verification failed');
         }
       } else {
+        console.log('Verification cancelled or failed:', finalPayload);
         alert('Verification was cancelled or failed');
       }
     } catch (error) {
