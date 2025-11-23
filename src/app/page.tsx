@@ -1,23 +1,43 @@
 import { Page } from '@/components/PageLayout';
 import { AuthButton } from '../components/AuthButton';
+import Image from 'next/image';
 
 export default function Home() {
   return (
     <Page>
-      <Page.Main className="flex flex-col items-center justify-center gap-6 px-6">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold mb-2">worldcoffee ☕</h1>
-          <p className="text-lg text-gray-600 mb-2">Support your friends with coffee</p>
-          <div className="flex items-center justify-center gap-2 text-sm text-blue-600 bg-blue-50 px-4 py-2 rounded-lg">
-            <span className="text-lg">✓</span>
-            <span>Verified humans only</span>
+      <Page.Main className="flex flex-col items-start justify-between h-full py-12">
+        <div className="w-full">
+          <div className="mb-12 flex flex-col items-center">
+            <Image
+              src="/coffee-logo.svg"
+              alt="Orbuccino Logo"
+              width={80}
+              height={80}
+              className="mb-4"
+            />
+            <h1 className="text-4xl font-bold">orbuccino</h1>
           </div>
+
+          <ul className="space-y-6 text-lg">
+            <li className="flex items-start gap-3">
+              <span className="text-2xl mt-1">👆</span>
+              <span>One click login</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-2xl mt-1">🌍</span>
+              <span>Support anyone on the world app</span>
+            </li>
+            <li className="flex items-start gap-3">
+              <span className="text-2xl mt-1">🔗</span>
+              <span>Deep link to share outside the world app</span>
+            </li>
+          </ul>
         </div>
-        <AuthButton />
-        <p className="text-xs text-gray-500 text-center max-w-sm">
-          This app requires World ID Orb verification. Only verified humans can access the platform.
-        </p>
       </Page.Main>
+
+      <Page.Footer>
+        <AuthButton />
+      </Page.Footer>
     </Page>
   );
 }

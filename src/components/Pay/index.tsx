@@ -14,6 +14,12 @@ export const Pay = () => {
   >(undefined);
 
   const onClickPay = async () => {
+    // Send haptic feedback
+    MiniKit.commands.sendHapticFeedback({
+      hapticsType: 'impact',
+      style: 'light',
+    });
+
     // Lets use Alex's username to pay!
     const address = (await MiniKit.getUserByUsername('alex')).walletAddress;
     setButtonState('pending');
