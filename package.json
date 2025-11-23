@@ -1,8 +1,8 @@
 {
-  "name": "@worldcoin/next-15-template",
+  "name": "orbuccino",
   "version": "0.1.0",
   "homepage": "https://docs.worldcoin.org/mini-apps",
-  "description": "Create a Mini App",
+  "description": "Buy coffee for friends with World ID verification",
   "license": "MIT",
   "private": true,
   "type": "module",
@@ -10,13 +10,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate": "tsx scripts/migrate.ts",
+    "verify-db": "tsx scripts/verify-tables.ts"
   },
   "dependencies": {
+    "@vercel/postgres": "^0.10.0",
     "@worldcoin/mini-apps-ui-kit-react": "^1.0.2",
     "@worldcoin/minikit-js": "latest",
     "@worldcoin/minikit-react": "latest",
     "clsx": "^2.1.1",
+    "dotenv": "^17.2.3",
     "iconoir-react": "^7.11.0",
     "next": "^16.0.3",
     "next-auth": "^5.0.0-beta.25",
@@ -35,6 +39,7 @@
     "eslint": "^9",
     "eslint-config-next": "^16.0.3",
     "tailwindcss": "^4",
+    "tsx": "^4.20.6",
     "typescript": "^5"
   }
 }

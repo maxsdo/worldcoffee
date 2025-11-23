@@ -5,15 +5,28 @@ import {
 } from '@worldcoin/minikit-js';
 import NextAuth, { type DefaultSession } from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
-import crypto from 'crypto';
 
 /**
  * Generates an HMAC-SHA256 hash of the provided nonce using a secret key from the environment.
+ * Uses Web Crypto API for Edge Runtime compatibility.
  */
-const hashNonce = ({ nonce }: { nonce: string }) => {
-  const hmac = crypto.createHmac('sha256', process.env.HMAC_SECRET_KEY!);
-  hmac.update(nonce);
-  return hmac.digest('hex');
+const hashNonce = async ({ nonce }: { nonce: string }) => {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(process.env.HMAC_SECRET_KEY!),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign(
+    'HMAC',
+    key,
+    encoder.encode(nonce)
+  );
+  return Array.from(new Uint8Array(signature))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('');
 };
 
 declare module 'next-auth' {
@@ -56,7 +69,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         signedNonce: string;
         finalPayloadJson: string;
       }) => {
-        const expectedSignedNonce = hashNonce({ nonce });
+        const expectedSignedNonce = await hashNonce({ nonce });
 
         if (signedNonce !== expectedSignedNonce) {
           console.log('Invalid signed nonce');
@@ -71,8 +84,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           console.log('Invalid final payload');
           return null;
         }
-        // Optionally, fetch the user info from your own database
+
+        // Fetch the user info from World API
         const userInfo = await MiniKit.getUserInfo(finalPayload.address);
+
+        // TODO: Re-enable once we verify the correct field name for verification level
+        // Check if user is verified human (Orb verification only)
+        // const userInfoWithVerification = userInfo as any;
+        // if (userInfoWithVerification.verificationLevel !== 'orb') {
+        //   console.log('User is not Orb verified. Verification level:', userInfoWithVerification.verificationLevel);
+        //   throw new Error('Only verified humans (Orb verification) can access this app');
+        // }
 
         return {
           id: finalPayload.address,
