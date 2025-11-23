@@ -1,7 +1,6 @@
 'use client';
 import { Button, Marble } from '@worldcoin/mini-apps-ui-kit-react';
 import { MiniKit } from '@worldcoin/minikit-js';
-import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 
@@ -12,7 +11,6 @@ interface FeaturedProfile {
 }
 
 export const ProfileLink = () => {
-  const session = useSession();
   const router = useRouter();
   const [searchUsername, setSearchUsername] = useState('');
   const [featuredProfiles, setFeaturedProfiles] = useState<FeaturedProfile[]>([]);
@@ -44,12 +42,6 @@ export const ProfileLink = () => {
     fetchFeaturedProfiles();
   }, []);
 
-  const handleViewProfile = () => {
-    if (session?.data?.user?.username) {
-      router.push(`/${session.data.user.username}`);
-    }
-  };
-
   const handleSearchProfile = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchUsername.trim()) {
@@ -65,22 +57,9 @@ export const ProfileLink = () => {
 
   return (
     <div className="grid w-full gap-4">
-      <p className="text-lg font-semibold">Your Profile</p>
-
-      <Button
-        onClick={handleViewProfile}
-        size="lg"
-        variant="secondary"
-        className="w-full"
-      >
-        View My Coffee Page
-      </Button>
-
       {/* Featured Profiles */}
       {featuredProfiles.length > 0 && (
         <>
-          <div className="w-full h-px bg-gray-200" />
-
           <p className="text-lg font-semibold">Featured</p>
 
           {featuredProfiles.map((profile) => (
