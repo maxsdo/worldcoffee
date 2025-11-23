@@ -3,6 +3,7 @@ import { Button, Marble } from '@worldcoin/mini-apps-ui-kit-react';
 import { MiniKit } from '@worldcoin/minikit-js';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { Username } from '@/components/Username';
 
 interface FeaturedProfile {
   username: string;
@@ -71,7 +72,9 @@ export const ProfileLink = () => {
               >
                 <Marble src={profile.profilePictureUrl} className="w-12" />
                 <div className="flex-1 text-left">
-                  <p className="font-semibold">@{profile.username}</p>
+                  <p className="font-semibold">
+                    <Username username={profile.username} className="font-semibold" />
+                  </p>
                   <p className="text-sm text-gray-500">Buy them a coffee</p>
                 </div>
                 <div className="text-2xl">☕</div>

@@ -5,6 +5,7 @@ import { MiniKit } from '@worldcoin/minikit-js';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { CoffeePurchase } from './CoffeePurchase';
+import { Username } from '@/components/Username';
 
 interface ProfileViewProps {
   username: string;
@@ -180,7 +181,9 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
       <div className="flex flex-col items-center gap-4 pt-6 w-full">
         <Marble src={profile.profilePictureUrl} className="w-24" />
         <div className="flex items-center gap-1">
-          <h1 className="text-2xl font-semibold">@{profile.username}</h1>
+          <h1 className="text-2xl font-semibold">
+            <Username username={profile.username} className="text-2xl font-semibold" />
+          </h1>
           {isVerified && (
             <CircularIcon size="sm">
               <CheckCircleSolid className="text-blue-600" />
@@ -285,7 +288,7 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
               <Marble src={message.fromProfilePictureUrl} className="w-10 h-10" />
               <div className="flex-1">
                 <div className="flex items-center gap-1">
-                  <p className="font-semibold text-sm">@{message.fromUsername}</p>
+                  <Username username={message.fromUsername} className="font-semibold text-sm" />
                   {message.fromUserVerified && (
                     <CircularIcon size="xs">
                       <CheckCircleSolid className="text-blue-600" />

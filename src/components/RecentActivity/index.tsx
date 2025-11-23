@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Marble, CircularIcon } from '@worldcoin/mini-apps-ui-kit-react';
 import { CheckCircleSolid } from 'iconoir-react';
 import { useRouter } from 'next/navigation';
+import { Username } from '@/components/Username';
 
 interface Message {
   id: string;
@@ -99,14 +100,14 @@ export const RecentActivity = () => {
             <Marble src={message.fromProfilePictureUrl} className="w-10 h-10" />
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1 flex-wrap">
-                <span className="font-semibold text-sm">@{message.fromUsername}</span>
+                <Username username={message.fromUsername} className="font-semibold text-sm" />
                 {message.fromUserVerified && (
                   <CircularIcon size="xs">
                     <CheckCircleSolid className="text-blue-600" />
                   </CircularIcon>
                 )}
                 <span className="text-gray-600 text-sm">bought</span>
-                <span className="font-semibold text-sm">@{message.toUsername}</span>
+                <Username username={message.toUsername} className="font-semibold text-sm" />
                 {message.toUserVerified && (
                   <CircularIcon size="xs">
                     <CheckCircleSolid className="text-blue-600" />

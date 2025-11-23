@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Button } from '@worldcoin/mini-apps-ui-kit-react';
+import { Username } from '@/components/Username';
 
 interface SuccessModalProps {
   isOpen: boolean;
@@ -37,7 +38,7 @@ export const SuccessModal = ({ isOpen, onClose, recipientUsername }: SuccessModa
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold mb-2">Coffee sent! 🎉</h2>
           <p className="text-gray-600">
-            You just made <span className="font-semibold text-blue-600">@{recipientUsername}</span>'s day brighter
+            You just made <Username username={recipientUsername} className="font-semibold text-blue-600" />'s day brighter
           </p>
         </div>
 
