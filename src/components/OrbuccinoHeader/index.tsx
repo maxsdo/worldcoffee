@@ -1,3 +1,4 @@
+'use client';
 import { OrbuccinoLogo } from '@/components/OrbuccinoLogo';
 
 interface OrbuccinoHeaderProps {
