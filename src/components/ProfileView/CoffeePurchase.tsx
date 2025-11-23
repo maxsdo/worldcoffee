@@ -54,7 +54,7 @@ export const CoffeePurchase = ({ profile, onSuccess }: CoffeePurchaseProps) => {
         tokens: [
           {
             symbol: Tokens.USDC,
-            token_amount: tokenToDecimals(4.99, Tokens.USDC).toString(),
+            token_amount: tokenToDecimals(0.04, Tokens.USDC).toString(),
           },
         ],
         description: `Coffee for @${profile.username}`,
@@ -69,7 +69,7 @@ export const CoffeePurchase = ({ profile, onSuccess }: CoffeePurchaseProps) => {
             paymentId: id,
             toUsername: profile.username,
             message: message.trim(),
-            amount: '4.99',
+            amount: '0.04',
             transactionHash: result.finalPayload.transaction_id,
           }),
         });
@@ -120,7 +120,7 @@ export const CoffeePurchase = ({ profile, onSuccess }: CoffeePurchaseProps) => {
             disabled={buttonState === 'pending'}
           />
         </div>
-        <p className="font-semibold">$4.99</p>
+        <p className="font-semibold">$0.04</p>
       </div>
 
       {/* Buy button */}

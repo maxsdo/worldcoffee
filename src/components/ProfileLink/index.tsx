@@ -18,10 +18,10 @@ export const ProfileLink = () => {
   const [featuredProfile, setFeaturedProfile] = useState<FeaturedProfile | null>(null);
 
   useEffect(() => {
-    // Fetch @telamon's profile from World API
+    // Fetch @maggo.1337's profile from World API
     const fetchFeaturedProfile = async () => {
       try {
-        const userInfo = await MiniKit.getUserByUsername('telamon');
+        const userInfo = await MiniKit.getUserByUsername('maggo.1337');
         if (userInfo && userInfo.username) {
           setFeaturedProfile({
             username: userInfo.username,
