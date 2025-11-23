@@ -19,6 +19,7 @@ export async function POST(request: Request) {
     const session = await auth();
 
     if (!session?.user) {
+      console.log('❌ Unauthorized coffee purchase attempt');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -26,11 +27,23 @@ export async function POST(request: Request) {
     const { paymentId, toUsername, message, amount, transactionHash } = body;
 
     if (!paymentId || !toUsername || !amount) {
+      console.log('❌ Missing required fields:', { paymentId, toUsername, amount });
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
+
+    // Log the coffee purchase attempt
+    console.log('☕ Coffee Purchase Initiated:', {
+      timestamp: new Date().toISOString(),
+      from: session.user.username,
+      to: toUsername,
+      amount: `$${amount}`,
+      paymentId,
+      hasMessage: !!message,
+      messagePreview: message ? message.substring(0, 50) : null,
+    });
 
     // Insert message into database
     const result = await sql`
@@ -63,9 +76,26 @@ export async function POST(request: Request) {
         created_at as "createdAt"
     `;
 
-    return NextResponse.json(result.rows[0]);
+    const savedMessage = result.rows[0];
+
+    // Log successful save
+    console.log('✅ Coffee Purchase Saved to Database:', {
+      id: savedMessage.id,
+      from: savedMessage.fromUsername,
+      to: savedMessage.toUsername,
+      amount: `$${savedMessage.amount}`,
+      message: savedMessage.message || '(no message)',
+      transactionHash: savedMessage.transactionHash || '(pending)',
+      createdAt: savedMessage.createdAt,
+    });
+
+    return NextResponse.json(savedMessage);
   } catch (error) {
-    console.error('Error saving message:', error);
+    console.error('❌ Error saving coffee purchase:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+    });
     return NextResponse.json(
       { error: 'Failed to save message' },
       { status: 500 }
