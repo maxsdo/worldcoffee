@@ -56,32 +56,34 @@ export const ProfileLink = () => {
   };
 
   return (
-    <div className="grid w-full gap-4">
+    <div className="w-full px-4">
       {/* Featured Profiles */}
       {featuredProfiles.length > 0 && (
         <>
-          <p className="text-lg font-semibold">Featured</p>
+          <h2 className="text-lg font-semibold mb-3">Featured</h2>
 
-          {featuredProfiles.map((profile) => (
-            <button
-              key={profile.username}
-              onClick={() => handleVisitFeatured(profile.username)}
-              className="w-full bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 hover:bg-gray-50 transition-colors"
-            >
-              <Marble src={profile.profilePictureUrl} className="w-12" />
-              <div className="flex-1 text-left">
-                <p className="font-semibold">@{profile.username}</p>
-                <p className="text-sm text-gray-500">Buy them a coffee</p>
-              </div>
-              <div className="text-2xl">☕</div>
-            </button>
-          ))}
+          <div className="flex flex-col gap-3 mb-4">
+            {featuredProfiles.map((profile) => (
+              <button
+                key={profile.username}
+                onClick={() => handleVisitFeatured(profile.username)}
+                className="w-full bg-white border border-gray-200 rounded-xl p-4 flex items-center gap-3 hover:bg-gray-50 transition-colors"
+              >
+                <Marble src={profile.profilePictureUrl} className="w-12" />
+                <div className="flex-1 text-left">
+                  <p className="font-semibold">@{profile.username}</p>
+                  <p className="text-sm text-gray-500">Buy them a coffee</p>
+                </div>
+                <div className="text-2xl">☕</div>
+              </button>
+            ))}
+          </div>
         </>
       )}
 
-      <div className="w-full h-px bg-gray-200" />
+      <div className="w-full h-px bg-gray-200 mb-4" />
 
-      <p className="text-lg font-semibold">Find Someone</p>
+      <h2 className="text-lg font-semibold mb-3">Find Someone</h2>
 
       <form onSubmit={handleSearchProfile} className="flex gap-2">
         <input

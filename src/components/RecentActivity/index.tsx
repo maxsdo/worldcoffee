@@ -65,7 +65,7 @@ export const RecentActivity = () => {
   if (loading) {
     return (
       <div className="w-full px-4">
-        <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+        <h2 className="text-lg font-semibold mb-3">Recent Activity</h2>
         <div className="flex flex-col gap-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="bg-gray-100 rounded-xl p-4 h-20 animate-pulse" />
@@ -78,7 +78,7 @@ export const RecentActivity = () => {
   if (messages.length === 0) {
     return (
       <div className="w-full px-4">
-        <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+        <h2 className="text-lg font-semibold mb-3">Recent Activity</h2>
         <div className="bg-gray-100 rounded-xl p-6 text-center">
           <p className="text-gray-600">No activity yet. Be the first to buy someone a coffee!</p>
         </div>
@@ -88,7 +88,7 @@ export const RecentActivity = () => {
 
   return (
     <div className="w-full px-4">
-      <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
+      <h2 className="text-lg font-semibold mb-3">Recent Activity</h2>
       <div className="flex flex-col gap-3">
         {messages.map((message) => (
           <div
