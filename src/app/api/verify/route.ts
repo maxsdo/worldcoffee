@@ -42,6 +42,43 @@ export async function POST(request: Request) {
       );
     }
 
+    // Verify the proof with World ID backend
+    const verifyResponse = await fetch('https://developer.worldcoin.org/api/v2/verify/app_81bdb04426c352ea509dcece674eaf48', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        nullifier_hash: payload.nullifier_hash,
+        merkle_root: payload.merkle_root,
+        proof: payload.proof,
+        verification_level: payload.verification_level,
+        action: 'verify-human',
+        signal: '',
+      }),
+    });
+
+    if (!verifyResponse.ok) {
+      const errorData = await verifyResponse.json();
+      console.log('❌ World ID verification failed:', errorData);
+      return NextResponse.json(
+        { error: 'World ID verification failed', detail: errorData },
+        { status: 400 }
+      );
+    }
+
+    const verifyData = await verifyResponse.json();
+
+    if (!verifyData.success) {
+      console.log('❌ World ID proof verification failed');
+      return NextResponse.json(
+        { error: 'Invalid proof' },
+        { status: 400 }
+      );
+    }
+
+    console.log('✅ World ID proof verified successfully');
+
     // Check if nullifier hash already exists
     const existing = await sql`
       SELECT username FROM verifications
