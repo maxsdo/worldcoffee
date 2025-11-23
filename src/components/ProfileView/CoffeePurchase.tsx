@@ -3,6 +3,7 @@ import { Button, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
 import { MiniKit, Tokens, tokenToDecimals } from '@worldcoin/minikit-js';
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { SuccessModal } from '../SuccessModal';
 
 interface UserProfile {
   walletAddress: string;
@@ -20,6 +21,7 @@ export const CoffeePurchase = ({ profile, onSuccess }: CoffeePurchaseProps) => {
   const [buttonState, setButtonState] = useState<
     'pending' | 'success' | 'failed' | undefined
   >(undefined);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const session = useSession();
 
   const handleBuyCoffee = async () => {
@@ -80,9 +82,11 @@ export const CoffeePurchase = ({ profile, onSuccess }: CoffeePurchaseProps) => {
           setMessage('');
           setButtonState('success');
 
+          // Show success modal after a brief delay
           setTimeout(() => {
+            setShowSuccessModal(true);
             setButtonState(undefined);
-          }, 3000);
+          }, 1000);
         } else {
           throw new Error('Failed to save message');
         }
@@ -102,7 +106,14 @@ export const CoffeePurchase = ({ profile, onSuccess }: CoffeePurchaseProps) => {
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col gap-4">
+    <>
+      <SuccessModal
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        recipientUsername={profile.username}
+      />
+
+      <div className="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col gap-4">
       {/* Coffee item */}
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center text-2xl">
@@ -144,5 +155,6 @@ export const CoffeePurchase = ({ profile, onSuccess }: CoffeePurchaseProps) => {
         </Button>
       </LiveFeedback>
     </div>
+    </>
   );
 };

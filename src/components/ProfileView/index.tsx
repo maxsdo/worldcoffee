@@ -117,10 +117,14 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
   };
 
   const handleShare = async () => {
+    // Create World app deep link
+    const appId = process.env.NEXT_PUBLIC_APP_ID;
+    const deepLink = `https://worldcoin.org/mini-app?app_id=${appId}&path=/${profile?.username}`;
+
     const shareData = {
       title: `Buy @${profile?.username} a coffee`,
       text: `Support @${profile?.username} by buying them a coffee!`,
-      url: window.location.href,
+      url: deepLink,
     };
 
     try {
@@ -128,7 +132,7 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
         await navigator.share(shareData);
       } else {
         // Fallback: copy to clipboard
-        await navigator.clipboard.writeText(window.location.href);
+        await navigator.clipboard.writeText(deepLink);
         alert('Link copied to clipboard!');
       }
     } catch (err) {
