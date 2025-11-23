@@ -1,5 +1,6 @@
 'use client';
-import { Button, Marble, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
+import { Button, Marble, LiveFeedback, CircularIcon } from '@worldcoin/mini-apps-ui-kit-react';
+import { CheckCircleSolid } from 'iconoir-react';
 import { MiniKit } from '@worldcoin/minikit-js';
 import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
@@ -22,6 +23,7 @@ interface Message {
   message: string;
   amount: string;
   createdAt: string;
+  fromUserVerified?: boolean; // Track if sender is verified
 }
 
 export const ProfileView = ({ username }: ProfileViewProps) => {
@@ -35,7 +37,6 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isVerified, setIsVerified] = useState(false);
-  const [verifying, setVerifying] = useState(false);
 
   const isOwnProfile = session.data?.user?.username?.toLowerCase() === username.toLowerCase();
 
@@ -62,7 +63,15 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
         const response = await fetch(`/api/messages/${username}`);
         if (response.ok) {
           const data = await response.json();
-          setMessages(data.messages || []);
+          const messagesWithVerification = await Promise.all(
+            (data.messages || []).map(async (msg: Message) => {
+              // Check if sender is verified
+              const verifyRes = await fetch(`/api/verify?username=${msg.fromUsername}`);
+              const verifyData = verifyRes.ok ? await verifyRes.json() : { verified: false };
+              return { ...msg, fromUserVerified: verifyData.verified };
+            })
+          );
+          setMessages(messagesWithVerification);
         }
 
         // Fetch profile description
@@ -125,61 +134,6 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
     setEditingDescription(false);
   };
 
-  const handleVerify = async () => {
-    if (!profile) return;
-
-    try {
-      setVerifying(true);
-
-      const { commandPayload, finalPayload } = await MiniKit.commandsAsync.verify({
-        action: 'verify-human',
-        signal: '',
-        verification_level: 'orb' as any, // Only accept orb verification
-      });
-
-      console.log('Verification payload:', finalPayload);
-
-      if (finalPayload.status === 'success') {
-        // Send verification to backend
-        const response = await fetch('/api/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ payload: finalPayload }),
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Verification saved:', data);
-
-          // Refetch verification status to ensure it's updated
-          const verifyResponse = await fetch(`/api/verify?username=${username}`);
-          if (verifyResponse.ok) {
-            const verifyData = await verifyResponse.json();
-            setIsVerified(verifyData.verified || false);
-            alert('✅ Successfully verified with World ID!');
-          } else {
-            console.error('Failed to fetch updated verification status');
-            // Still set it locally even if refetch fails
-            setIsVerified(true);
-            alert('✅ Successfully verified with World ID!');
-          }
-        } else {
-          const data = await response.json();
-          console.error('Verification API error:', data);
-          alert(data.error || 'Verification failed');
-        }
-      } else {
-        console.log('Verification cancelled or failed:', finalPayload);
-        alert('Verification was cancelled or failed');
-      }
-    } catch (error) {
-      console.error('Error verifying:', error);
-      alert('Verification failed. Please try again.');
-    } finally {
-      setVerifying(false);
-    }
-  };
-
   const handleShare = async () => {
     // Create World app deep link
     const appId = process.env.NEXT_PUBLIC_APP_ID;
@@ -225,12 +179,12 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
       {/* Profile Header */}
       <div className="flex flex-col items-center gap-4 pt-6 w-full">
         <Marble src={profile.profilePictureUrl} className="w-24" />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <h1 className="text-2xl font-semibold">@{profile.username}</h1>
           {isVerified && (
-            <span className="text-blue-600 text-2xl" title="Verified Human (Orb)">
-              ✓
-            </span>
+            <CircularIcon size="sm">
+              <CheckCircleSolid className="text-blue-600" />
+            </CircularIcon>
           )}
         </div>
 
@@ -291,19 +245,6 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
           )}
         </div>
 
-        {/* Verify Button - Only for own profile if not verified */}
-        {isOwnProfile && !isVerified && (
-          <Button
-            onClick={handleVerify}
-            size="lg"
-            variant="primary"
-            className="w-full rounded-full"
-            disabled={verifying}
-          >
-            {verifying ? 'Verifying...' : '🔐 Verify with World ID'}
-          </Button>
-        )}
-
         {/* Share Button - Full Width */}
         <Button
           onClick={handleShare}
@@ -343,7 +284,14 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
             >
               <Marble src={message.fromProfilePictureUrl} className="w-10 h-10" />
               <div className="flex-1">
-                <p className="font-semibold text-sm">@{message.fromUsername}</p>
+                <div className="flex items-center gap-1">
+                  <p className="font-semibold text-sm">@{message.fromUsername}</p>
+                  {message.fromUserVerified && (
+                    <CircularIcon size="xs">
+                      <CheckCircleSolid className="text-blue-600" />
+                    </CircularIcon>
+                  )}
+                </div>
                 {message.message && (
                   <p className="text-gray-700 mt-1">{message.message}</p>
                 )}
