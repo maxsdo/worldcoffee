@@ -19,6 +19,12 @@ export const Verify = () => {
   );
 
   const onClickVerify = async (verificationLevel: VerificationLevel) => {
+    // Send haptic feedback
+    MiniKit.commands.sendHapticFeedback({
+      hapticsType: 'impact',
+      style: 'light',
+    });
+
     setButtonState('pending');
     setWhichVerification(verificationLevel);
     const result = await MiniKit.commandsAsync.verify({

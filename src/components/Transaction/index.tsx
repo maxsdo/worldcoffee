@@ -69,6 +69,12 @@ export const Transaction = () => {
 
   // This is a basic transaction call to mint a token
   const onClickGetToken = async () => {
+    // Send haptic feedback
+    MiniKit.commands.sendHapticFeedback({
+      hapticsType: 'impact',
+      style: 'light',
+    });
+
     setTransactionId('');
     setWhichButton('getToken');
     setButtonState('pending');
@@ -110,6 +116,12 @@ export const Transaction = () => {
   // This is a basic transaction call to use Permit2 to spend the token you minted
   // Make sure to call Mint Token first
   const onClickUsePermit2 = async () => {
+    // Send haptic feedback
+    MiniKit.commands.sendHapticFeedback({
+      hapticsType: 'impact',
+      style: 'light',
+    });
+
     setTransactionId('');
     setWhichButton('usePermit2');
     setButtonState('pending');
