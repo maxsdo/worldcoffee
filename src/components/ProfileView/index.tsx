@@ -2,6 +2,7 @@
 import { Button, Marble, LiveFeedback } from '@worldcoin/mini-apps-ui-kit-react';
 import { MiniKit } from '@worldcoin/minikit-js';
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 import { CoffeePurchase } from './CoffeePurchase';
 
 interface ProfileViewProps {
@@ -24,10 +25,13 @@ interface Message {
 }
 
 export const ProfileView = ({ username }: ProfileViewProps) => {
+  const session = useSession();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const isOwnProfile = session.data?.user?.username?.toLowerCase() === username.toLowerCase();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -69,6 +73,26 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
     setMessages(prev => [newMessage, ...prev]);
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: `Buy @${profile?.username} a coffee`,
+      text: `Support @${profile?.username} by buying them a coffee!`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link copied to clipboard!');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center w-full py-12">
@@ -91,20 +115,34 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
       <div className="flex flex-col items-center gap-4 pt-6">
         <Marble src={profile.profilePictureUrl} className="w-24" />
         <h1 className="text-2xl font-semibold">@{profile.username}</h1>
+
+        {/* Share Button */}
+        <Button
+          onClick={handleShare}
+          size="lg"
+          variant="secondary"
+          className="rounded-full px-8"
+        >
+          Share
+        </Button>
       </div>
 
-      {/* Call to action box */}
-      <div className="bg-gray-100 rounded-2xl p-8 text-center">
-        <p className="text-lg font-medium">
-          Be the first one to buy {profile.username} a coffee
-        </p>
-      </div>
+      {/* Call to action box - only show for other users */}
+      {!isOwnProfile && messages.length === 0 && (
+        <div className="bg-gray-100 rounded-2xl p-8 text-center">
+          <p className="text-lg font-medium">
+            Be the first one to buy {profile.username} a coffee
+          </p>
+        </div>
+      )}
 
-      {/* Coffee Purchase Section */}
-      <CoffeePurchase
-        profile={profile}
-        onSuccess={handleCoffeePurchased}
-      />
+      {/* Coffee Purchase Section - only show if not own profile */}
+      {!isOwnProfile && (
+        <CoffeePurchase
+          profile={profile}
+          onSuccess={handleCoffeePurchased}
+        />
+      )}
 
       {/* Messages Section */}
       {messages.length > 0 && (

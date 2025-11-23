@@ -1,5 +1,6 @@
 import { Page } from '@/components/PageLayout';
 import { ProfileView } from '@/components/ProfileView';
+import { BackButton } from '@/components/BackButton';
 import { TopBar } from '@worldcoin/mini-apps-ui-kit-react';
 import { notFound } from 'next/navigation';
 
@@ -25,7 +26,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         <TopBar
           title="worldcoffee"
           startAdornment={
-            <div className="w-3 h-3 bg-blue-600 rounded-full" />
+            <>
+              <BackButton />
+              <div className="w-3 h-3 bg-blue-600 rounded-full ml-4" />
+            </>
           }
         />
       </Page.Header>
