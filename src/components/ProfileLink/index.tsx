@@ -18,7 +18,7 @@ export const ProfileLink = () => {
   useEffect(() => {
     // Fetch featured profiles from World API
     const fetchFeaturedProfiles = async () => {
-      const usernames = ['telamon', 'maksim', 'leighton'];
+      const usernames = ['ed0ceja.4635', 'maksim', 'leighton'];
       const profiles: FeaturedProfile[] = [];
 
       for (const username of usernames) {
