@@ -34,6 +34,8 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
   const [savingDescription, setSavingDescription] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isVerified, setIsVerified] = useState(false);
+  const [verifying, setVerifying] = useState(false);
 
   const isOwnProfile = session.data?.user?.username?.toLowerCase() === username.toLowerCase();
 
@@ -69,6 +71,13 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
           const descData = await descResponse.json();
           setDescription(descData.description || '');
           setTempDescription(descData.description || '');
+        }
+
+        // Fetch verification status
+        const verifyResponse = await fetch(`/api/verify?username=${username}`);
+        if (verifyResponse.ok) {
+          const verifyData = await verifyResponse.json();
+          setIsVerified(verifyData.verified || false);
         }
       } catch (err) {
         console.error('Error fetching profile:', err);
@@ -116,6 +125,44 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
     setEditingDescription(false);
   };
 
+  const handleVerify = async () => {
+    if (!profile) return;
+
+    try {
+      setVerifying(true);
+
+      const { commandPayload, finalPayload } = await MiniKit.commandsAsync.verify({
+        action: 'verify-human',
+        signal: '',
+        verification_level: 'orb' as any, // Only accept orb verification
+      });
+
+      if (finalPayload.status === 'success') {
+        // Send verification to backend
+        const response = await fetch('/api/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ payload: finalPayload }),
+        });
+
+        if (response.ok) {
+          setIsVerified(true);
+          alert('✅ Successfully verified with World ID!');
+        } else {
+          const data = await response.json();
+          alert(data.error || 'Verification failed');
+        }
+      } else {
+        alert('Verification was cancelled or failed');
+      }
+    } catch (error) {
+      console.error('Error verifying:', error);
+      alert('Verification failed. Please try again.');
+    } finally {
+      setVerifying(false);
+    }
+  };
+
   const handleShare = async () => {
     // Create World app deep link
     const appId = process.env.NEXT_PUBLIC_APP_ID;
@@ -161,7 +208,14 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
       {/* Profile Header */}
       <div className="flex flex-col items-center gap-4 pt-6 w-full">
         <Marble src={profile.profilePictureUrl} className="w-24" />
-        <h1 className="text-2xl font-semibold">@{profile.username}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-2xl font-semibold">@{profile.username}</h1>
+          {isVerified && (
+            <span className="text-blue-600 text-2xl" title="Verified Human (Orb)">
+              ✓
+            </span>
+          )}
+        </div>
 
         {/* Description Section */}
         <div className="w-full">
@@ -219,6 +273,19 @@ export const ProfileView = ({ username }: ProfileViewProps) => {
             </div>
           )}
         </div>
+
+        {/* Verify Button - Only for own profile if not verified */}
+        {isOwnProfile && !isVerified && (
+          <Button
+            onClick={handleVerify}
+            size="lg"
+            variant="primary"
+            className="w-full rounded-full"
+            disabled={verifying}
+          >
+            {verifying ? 'Verifying...' : '🔐 Verify with World ID'}
+          </Button>
+        )}
 
         {/* Share Button - Full Width */}
         <Button

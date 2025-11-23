@@ -21,3 +21,16 @@ CREATE TABLE IF NOT EXISTS profile_descriptions (
   description TEXT NOT NULL,
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- World ID verifications table
+CREATE TABLE IF NOT EXISTS verifications (
+  username TEXT PRIMARY KEY,
+  verification_level TEXT NOT NULL,
+  nullifier_hash TEXT UNIQUE NOT NULL,
+  merkle_root TEXT NOT NULL,
+  proof TEXT NOT NULL,
+  verified_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create index on nullifier_hash for uniqueness check
+CREATE INDEX IF NOT EXISTS idx_verifications_nullifier ON verifications(nullifier_hash);
