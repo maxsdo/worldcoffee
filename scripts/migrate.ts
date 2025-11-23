@@ -1,6 +1,10 @@
+import { config } from 'dotenv';
 import { sql } from '@vercel/postgres';
 import * as fs from 'fs';
 import * as path from 'path';
+
+// Load environment variables from .env file
+config();
 
 async function migrate() {
   try {
