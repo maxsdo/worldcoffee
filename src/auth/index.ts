@@ -84,8 +84,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           console.log('Invalid final payload');
           return null;
         }
-        // Optionally, fetch the user info from your own database
+
+        // Fetch the user info from World API
         const userInfo = await MiniKit.getUserInfo(finalPayload.address);
+
+        // Check if user is verified human (Orb verification only)
+        const userInfoWithVerification = userInfo as any;
+        if (userInfoWithVerification.verificationLevel !== 'orb') {
+          console.log('User is not Orb verified. Verification level:', userInfoWithVerification.verificationLevel);
+          throw new Error('Only verified humans (Orb verification) can access this app');
+        }
 
         return {
           id: finalPayload.address,
