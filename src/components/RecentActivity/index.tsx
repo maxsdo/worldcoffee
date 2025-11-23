@@ -26,11 +26,11 @@ export const RecentActivity = () => {
     const fetchRecentActivity = async () => {
       try {
         setLoading(true);
-        // Fetch all messages and take the 3 most recent
+        // Fetch all messages
         const response = await fetch('/api/messages');
         if (response.ok) {
           const data = await response.json();
-          const recentMessages = (data.messages || []).slice(0, 3);
+          const recentMessages = data.messages || [];
 
           // Fetch verification status for both sender and recipient
           const messagesWithVerification = await Promise.all(
@@ -68,7 +68,7 @@ export const RecentActivity = () => {
       <div className="w-full px-4">
         <h2 className="text-lg font-semibold mb-3">Recent Activity</h2>
         <div className="flex flex-col gap-3">
-          {[1, 2, 3].map((i) => (
+          {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="bg-gray-100 rounded-xl p-4 h-20 animate-pulse" />
           ))}
         </div>
